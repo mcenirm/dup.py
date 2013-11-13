@@ -14,7 +14,52 @@ def print_usage():
     print('Usage:', sys.argv[0], 'map_file source_file [...]', file=sys.stderr)
 
 MapEntryPart = collections.namedtuple('MapEntryPart', ['user', 'host', 'path'])
-MapEntry = collections.namedtuple('MapEntry', ['source', 'destination'])
+
+
+class MapEntry(collections.namedtuple(
+    'MapEntry',
+    [
+        'source_host',
+        'source_path',
+        'destination_user',
+        'destination_host',
+        'destination_path'
+    ]
+)):
+
+    def potato(self):
+        return 'potato: ' + str(self)
+
+
+def parse_scp_target(target_string):
+    before, _, path = target_string.partition(':')
+    if path == '':
+        return None, None, before
+    else:
+        before, _, host = before.partition('@')
+        if host == '':
+            return None, before, path
+        else:
+            return before, host, path
+
+
+def parse_entry(entry_string):
+    if entry_string.lstrip().startswith('#'):
+        # comment
+        return None
+    else:
+        source_host, source_path, destination = entry_string.split()
+        destination_user, destination_host, destination_path = parse_scp_target(
+            destination
+        )
+        entry = MapEntry(
+            source_host,
+            source_path,
+            destination_user,
+            destination_host,
+            destination_path
+        )
+        return entry
 
 
 def parse_part(part_string):
@@ -32,6 +77,8 @@ def parse_part(part_string):
 
 
 def matches(entry, user, host, path):
+    if entry is None and user is None and host is None and path is None:
+        return None
     print('matches(', entry, user, host, path, ')')
     return False
 

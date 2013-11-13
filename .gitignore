@@ -1,4 +1,2 @@
-ex.dup
-ex-src
-ex-src2
-ex-dst
+*.pyc
+__pycache__
